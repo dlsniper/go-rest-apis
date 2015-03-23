@@ -1,0 +1,219 @@
+Building high-performance APIs
+12 May 2015
+
+Florin Patan
+Senior Software Engineer, Tapglue
+florinpatan@gmail.com
+http://github.com/dlsniper
+@dlsniper
+
+
+* Who am I?
+
+My name is Florin.
+
+Discovered Go about 2 years ago.
+
+Contributor to the Go plugin for IntelliJ IDEA and other open-source projects.
+
+* What is Tapglue?
+
+A young Berlin based start-up.
+
+A powerful Social Layer for apps.
+
+Build user profiles, friends and news feeds into your product.
+
+* Goals
+
+Determine how to build a high-performance API using Go taking the following steps:
+
+- Check if Go is a good choice for this task
+- Identify packages suitable for building REST API
+- Finding bottlenecks & Tunning performance
+
+* Why Go?
+
+- it's fun, it makes you think about what you type and your app actually does
+- compiler will check the variable types for you
+- <3 to deploy
+- -race
+- community, tools, speed, simplicity, concurrency, mascot
+
+* REST APIs
+
+A rest API can look like this:
+
+.link https://api.tapglue.com/versions https://api.tapglue.com/versions
+
+
+Your web application is usually composed of the following:
+- routes
+- handlers
+- storage
+- tests
+
+* Routes and handlers
+
+Go provides a HTTP server out of the box.
+
+.link https://github.com/julienschmidt/go-http-routing-benchmark https://github.com/julienschmidt/go-http-routing-benchmark
+
+.image benchmark.png 590 _
+
+* Gorilla Mux example
+
+.play demo1.go /^func httpDemo/,/^}/
+
+* Storage
+
+Databases are many so are the drivers.
+
+Tutorial for SQL and SQL-like databases:
+
+.link http://go-database-sql.org/ http://go-database-sql.org/
+
+Some drivers
+
+.link https://github.com/ziutek/mymysql MySQL (mymysql)
+.link https://github.com/go-sql-driver/mysql MySQL (mysql)
+
+.link https://github.com/lib/pq Postgres (pq, pure Go)
+
+.link https://github.com/mattn/go-sqlite3 SQLite (go-sqlite3)
+
+List of Go DB drivers
+
+.link https://github.com/golang/go/wiki/SQLDrivers https://github.com/golang/go/wiki/SQLDrivers
+
+* SQL Example
+
+    var (
+        id int
+        name string
+    )
+
+    rows, err := db.Query("select id, name from users where id = ?", 1)
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    defer rows.Close()
+    for rows.Next() {
+        err := rows.Scan(&id, &name)
+        if err != nil {
+            log.Fatal(err)
+        }
+        log.Println(id, name)
+    }
+
+    err = rows.Err()
+    if err != nil {
+        log.Fatal(err)
+    }
+
+
+* Testing and Go
+
+There are more than a dozen testing packages.
+
+.link https://github.com/shageman/gotestit https://github.com/shageman/gotestit
+
+.image testing.png 500 _
+
+* Running tests in Go
+
+Forget mocks, just call the real stuff (unless you should mock, then mock)
+
+    // How you can run your tests in Go
+    go test -race yourPackage
+
+Even better, you can have coverage reports
+
+    // Go tests with coverage reports
+    go test -race -coverpkg=packageA,packageB yourTestedPackage
+
+* More fun with testing
+
+Parallel tests
+
+    // To run tests in parallel add the following line at the beginning of the test
+    t.Parallel()
+
+Black box testing for your package
+
+    // Normal package name
+    package avengers
+
+    // Black-boxed test package
+    package avengers_test
+
+* Response times - benchmarks
+
+Need for Speed?
+
+    // This is how you correctly create a benchmark
+    func BenchmarkNeedForSpeed(b *testing.B) {
+        for i := 1; i <= b.N; i++ {
+            MarvelRules()
+        }
+    }
+
+Lets see how fast things are
+
+    // Benchmark the CPU
+    go test -bench=. -cpuprofile=cpu.out
+
+    // Benchmark the memory allocations
+    go test -bench=. -benchmem -memprofile=mem.out -test.memprofilerate=1
+
+We can also run this for a few minutes, just add:
+
+    -benchtime=5m
+
+* Stop! Demo time!
+
+* Pain points with Go
+
+- syntax is a bit strange for the first 3-4 apps
+- you can't really fit other programming languages into Go
+- you can't compile with unsed imports / vars (and that's a good thing, mostly)
+
+.play fail.go /^func main/,/^}/
+
+Really???
+
+* Stuff I didn't covered
+
+NoSQL Storage
+    Redis, Aerospike, RethingDB, Cassandra, etc.
+
+Concurrency
+
+.link https://www.youtube.com/watch?v=QDDwwePbDtw Google I/O 2013 - Advanced Go Concurrency Patterns
+
+Pipelines
+
+.link https://blog.golang.org/pipelines Go Concurrency Patterns: Pipelines and cancellation
+
+Contexts
+
+.link https://blog.golang.org/context Go Concurrency Patterns: Context
+
+
+* Links
+
+
+.link https://github.com/julienschmidt/go-http-routing-benchmark Go HTTP Routing Benchmark
+
+.link http://www.gorillatoolkit.org/pkg/mux Gorilla Mux
+
+.link http://go-database-sql.org/ Go database tutorial
+
+.link https://github.com/golang/go/wiki/SQLDrivers Go SQL Drivers
+
+.link https://golang.org https://golang.org
+
+.link https://tapglue.com Tapglue https://tapglue.com
+
+* Questions?
